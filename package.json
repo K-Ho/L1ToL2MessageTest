@@ -1,0 +1,44 @@
+{
+	"name": "optimistic-depositer",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Start a new project using me as a template!",
+	"main": "index.js",
+	"dependencies": {
+		"axios": "0.19.2",
+		"bn.js": "^5.1.1",
+		"chalk": "3.0.0",
+		"decimal.js": "10.2.0",
+		"dotenv-safe": "8.2.0",
+		"ethers": "^5.0.0",
+		"pm2": "4.2.3",
+		"synthetix": "2.30.2-ovm",
+		"@eth-optimism/watcher": "0.0.1-alpha.4",
+		"web3-utils": "^1.2.6"
+	},
+	"devDependencies": {
+		"eslint": "6.8.0",
+		"eslint-config-prettier": "6.10.1",
+		"eslint-plugin-import": "2.20.1",
+		"eslint-plugin-prettier": "3.1.2",
+		"prettier": "~1.19.1"
+	},
+	"scripts": {
+		"test": "npm run lint",
+		"lint": "eslint .",
+		"format": "prettier --write '**/*.js'",
+		"start": "node index.js",
+		"process:start": "pm2 start index.js",
+		"process:stop": "pm2 stop index.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Synthetixio/optimistic-oracle.git"
+	},
+	"author": "Synthetix",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Synthetixio/optimistic-oracle/issues"
+	},
+	"homepage": "https://github.com/Synthetixio/optimistic-oracle#readme"
+}
