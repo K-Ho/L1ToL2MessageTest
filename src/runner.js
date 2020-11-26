@@ -60,7 +60,7 @@ const deployL1SimpleStorage = async () => {
 const deployL2SimpleStorage = async () => {
 	const SimpleStorageJson = JSON.parse(fs.readFileSync('contracts/SimpleStorage.json'))
 	const SimpleStorageFactory = new ContractFactory(SimpleStorageJson.abi, SimpleStorageJson.bytecode, l2Wallet)
-	SimpleStorage = await SimpleStorageFactory.deploy()
+	SimpleStorage = await SimpleStorageFactory.deploy({gasLimit: 11000000})
 	console.log(green('Deployed SimpleStorage to', SimpleStorage.address))
 	console.log(green('deployment tx: http://https://l2-explorer.surge.sh/tx/' + SimpleStorage.deployTransaction.hash))
 	// await sleep(3000)
@@ -102,8 +102,8 @@ const deposit = async (amount) => {
 	console.log('totalCount', (await SimpleStorage.totalCount()).toString())
 }
 
-const withdraw = async (amount) => {
-	const calldata = SimpleStorage.interface.encodeFunctionData('setValue', [`0x${'42'.repeat(32)}`])
+const withdraw = async () => {
+	const calldata = SimpleStorage.interface.encodeFunctionData('setValue', [`0x${'77'.repeat(32)}`])
 	const l2ToL1Tx = await L2Messenger.sendMessage(
 		SimpleStorage.address,
 		calldata,
@@ -115,11 +115,11 @@ const withdraw = async (amount) => {
 	const count = (await SimpleStorage.totalCount()).toString()
 	while (count == (await SimpleStorage.totalCount()).toString()) {
 		console.log('total count', (await SimpleStorage.totalCount()).toString())
-		console.log('sleeping...')
+		console.log('sleeping 1 minute...')
 		await sleep(60000)
 	}
 	console.log('simple storage msg.sender', await SimpleStorage.msgSender())
-	console.log('simple storage xDomainMessageSender', await SimpleStorage.l1ToL2Sender())
+	console.log('simple storage xDomainMessageSender', await SimpleStorage.l2ToL1Sender())
 	console.log('simple storage value', await SimpleStorage.value())
 	console.log('totalCount', (await SimpleStorage.totalCount()).toString())
 }
@@ -127,9 +127,7 @@ const withdraw = async (amount) => {
 async function runner() {
 	try {
 		// DEPOSITS
-		// while(true) {
-		// 	await deployL2SimpleStorage()
-		// }
+		// await deployL2SimpleStorage()
 		// while(true) {
 		// 	await deposit(1)
 		// }
@@ -139,7 +137,7 @@ async function runner() {
 		// await deployL1SimpleStorage(true)
 		// await deployProxyL2Messenger()
 		while(true) {
-			await withdraw(1)
+			await withdraw()
 		}
 	} catch (err) {
 		console.error(red('Error detected:', err))
