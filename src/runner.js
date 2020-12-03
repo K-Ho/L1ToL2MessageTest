@@ -113,15 +113,14 @@ const withdraw = async () => {
 	await l2Provider.waitForTransaction(l2ToL1Tx.hash)
 	console.log(green('L2->L1 setValue tx complete: http://https://l2-explorer.surge.sh/tx/' + l2ToL1Tx.hash))
 	const count = (await SimpleStorage.totalCount()).toString()
-	while (count == (await SimpleStorage.totalCount()).toString()) {
-		console.log('total count', (await SimpleStorage.totalCount()).toString())
+	while (true) {
+		console.log('simple storage msg.sender', await SimpleStorage.msgSender())
+		console.log('simple storage xDomainMessageSender', await SimpleStorage.l2ToL1Sender())
+		console.log('simple storage value', await SimpleStorage.value())
+		console.log('totalCount', (await SimpleStorage.totalCount()).toString())
 		console.log('sleeping 1 minute...')
 		await sleep(60000)
 	}
-	console.log('simple storage msg.sender', await SimpleStorage.msgSender())
-	console.log('simple storage xDomainMessageSender', await SimpleStorage.l2ToL1Sender())
-	console.log('simple storage value', await SimpleStorage.value())
-	console.log('totalCount', (await SimpleStorage.totalCount()).toString())
 }
 
 async function runner() {
@@ -134,8 +133,8 @@ async function runner() {
 
 		// // WITHDRAWS
 		// await deployL2Messenger()
-		// await deployL1SimpleStorage(true)
 		// await deployProxyL2Messenger()
+		await deployL1SimpleStorage()
 		while(true) {
 			await withdraw()
 		}
