@@ -61,14 +61,12 @@ const deposit = async (amount) => {
 		5000000,
 		{gasLimit:7000000}
 	)
-	await l1Provider.waitForTransaction(l1ToL2Tx.hash)
+	await l1ToL2Tx.wait()
 	console.log(green('L1->L2 setValue tx complete: https://goerli.etherscan.io/tx/' + l1ToL2Tx.hash))
-	const count = (await SimpleStorage.totalCount()).toString()
-	while (count == (await SimpleStorage.totalCount()).toString()) {
-		console.log('total count', (await SimpleStorage.totalCount()).toString())
-		console.log('sleeping...')
-		await sleep(5000)
-	}
+	const [msgHash] = await watcher.getMessageHashesFromL1Tx(l1ToL2Tx.hash)
+	console.log('got L1->L2 message hash!', msgHash)
+	const receipt = await watcher.getL2TransactionReceipt(msgHash)
+	console.log('completed l1->L2 relay! L2 tx hash:', receipt.transactionHash)
 	console.log('simple storage msg.sender', await SimpleStorage.msgSender())
 	console.log('simple storage xDomainMessageSender', await SimpleStorage.l1ToL2Sender())
 	console.log('simple storage value', await SimpleStorage.value())
@@ -78,7 +76,7 @@ const deposit = async (amount) => {
 async function runner() {
 	try {
 		await deploySimpleStorage()
-		// initWatcher()
+		initWatcher()
 		while(true) {
 			await deposit(1)
 		}
