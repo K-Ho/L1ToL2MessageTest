@@ -15,4 +15,8 @@ contract SimpleStorage {
         value = newValue;
         totalCount++;
     }
+
+    function dumbSetValue(bytes32 newValue) public {
+        value = newValue;
+    }
 }
