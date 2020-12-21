@@ -17,7 +17,7 @@ const l2Provider = new JsonRpcProvider(optimismURL)
 const l1Provider = new JsonRpcProvider(goerliURL)
 
 const l1Wallet = new Wallet(process.env.L1_USER_PRIVATE_KEY, l1Provider)
-const l2Wallet = new Wallet(process.env.L1_USER_PRIVATE_KEY, l2Provider)
+const l2Wallet = new Wallet(process.env.L2_USER_PRIVATE_KEY, l2Provider)
 
 const messengerJSON = JSON.parse(fs.readFileSync('contracts/iOVM_BaseCrossDomainMessenger.json'))
 const l2MessengerJSON = JSON.parse(fs.readFileSync('contracts/OVM_L2CrossDomainMessenger.json'))
@@ -47,10 +47,12 @@ const deploySimpleStorage = async () => {
 	const SimpleStorageFactory = new ContractFactory(SimpleStorageJson.abi, SimpleStorageJson.bytecode, l2Wallet)
 	SimpleStorage = await SimpleStorageFactory.deploy()
 	console.log(green('Deployed SimpleStorage to', SimpleStorage.address))
+	const receipt = await SimpleStorage.deployTransaction.wait()
+	// console.log('SimpleStorage deployment receipt', receipt)
 	await sleep(3000)
 }
 
-const deposit = async (amount) => {
+const deposit = async () => {
 	const L1Messenger = new Contract(process.env.L1_MESSENGER_ADDRESS, messengerJSON.abi, l1Wallet)
 	L2Messenger = new Contract(process.env.L2_MESSENGER_ADDRESS, l2MessengerJSON.abi, l2Wallet)
 
@@ -78,7 +80,7 @@ async function runner() {
 		await deploySimpleStorage()
 		initWatcher()
 		while(true) {
-			await deposit(1)
+			await deposit()
 		}
 	} catch (err) {
 		console.error(red('Error detected:', err))
