@@ -47,6 +47,14 @@ const initWatcher = () => {
 	})
 }
 
+const deployProxyL2Messenger = async () => {
+	const Proxy_L2MessengerFactory = new ContractFactory(proxyL2MessengerJSON.abi, proxyL2MessengerJSON.bytecode, l2Wallet)
+	ProxyL2Messenger = await Proxy_L2MessengerFactory.deploy()
+	await ProxyL2Messenger.deployTransaction.wait()
+	console.log(green('Deployed ProxyL2Messenger to', ProxyL2Messenger.address))
+	console.log(green('deployment tx: http://https://l2-explorer.surge.sh/tx/' + ProxyL2Messenger.deployTransaction.hash))
+}
+
 const deployL1SimpleStorage = async () => {
 	if (process.env.L1_SIMPLE_STORAGE_ADDRESS) {
 		SimpleStorage = new Contract(process.env.L1_SIMPLE_STORAGE_ADDRESS, SimpleStorageJson.abi, l1Wallet)
@@ -63,14 +71,15 @@ const deployL1SimpleStorage = async () => {
 
 const withdraw = async () => {
 	const calldata = SimpleStorage.interface.encodeFunctionData('setValue', [`0x${'77'.repeat(32)}`])
-	const l2ToL1Tx = await L2Messenger.sendMessage(
+	const l2ToL1Tx = await ProxyL2Messenger.sendMessage(
 		SimpleStorage.address,
 		calldata,
 		5000000,
 		{gasLimit:7000000}
 	)
-	await l2Provider.waitForTransaction(l2ToL1Tx.hash)
 	console.log(green('L2->L1 setValue tx complete: http://https://l2-explorer.surge.sh/tx/' + l2ToL1Tx.hash))
+	const receipt = await l2ToL1Tx.wait()
+	console.log('receipt for L2Messenger.sendMessage:', receipt)
 	const count = (await SimpleStorage.totalCount()).toString()
 	while (true) {
 		console.log('simple storage msg.sender', await SimpleStorage.msgSender())
@@ -85,6 +94,7 @@ const withdraw = async () => {
 async function runner() {
 	try {
 		await deployL1SimpleStorage()
+		await deployProxyL2Messenger()
 		while(true) {
 			await withdraw()
 		}
