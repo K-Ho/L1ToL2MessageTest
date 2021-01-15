@@ -60,8 +60,7 @@ const deposit = async () => {
 	const l1ToL2Tx = await L1Messenger.sendMessage(
 		SimpleStorage.address,
 		calldata,
-		5000000,
-		{gasLimit:7000000}
+		5000000
 	)
 	await l1ToL2Tx.wait()
 	console.log(green('L1->L2 setValue tx complete: https://goerli.etherscan.io/tx/' + l1ToL2Tx.hash))
@@ -79,9 +78,7 @@ async function runner() {
 	try {
 		await deploySimpleStorage()
 		initWatcher()
-		while(true) {
-			await deposit()
-		}
+		await deposit()
 	} catch (err) {
 		console.error(red('Error detected:', err))
 	}
